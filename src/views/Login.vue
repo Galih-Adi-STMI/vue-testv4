@@ -2,7 +2,6 @@
 import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-// Data dummy untuk autentikasi
 const dummyCredentials = {
     username: 'admin',
     password: 'password123'
@@ -18,30 +17,24 @@ const state = reactive({
     error: ''
 });
 
-// Validasi form
 const isFormValid = computed(() => {
     return state.form.loginId.trim() !== '' && state.form.loginPw.trim() !== '';
 });
 
 const submit = () => {
-    // Reset error message
     state.error = '';
 
-    // Cek apakah form kosong
     if (!isFormValid.value) {
         state.error = 'Username dan password harus diisi';
         return;
     }
 
-    // Verifikasi kredensial
     if (
         state.form.loginId === dummyCredentials.username &&
         state.form.loginPw === dummyCredentials.password
     ) {
-        // Login berhasil, arahkan ke dashboard
         router.push({ name: 'dashboard' });
     } else {
-        // Login gagal
         state.error = 'Username atau password salah';
     }
 };
