@@ -1,6 +1,12 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
+
+// Data dummy untuk autentikasi
+const dummyCredentials = {
+    username: 'admin',
+    password: 'password123'
+};
 
 const router = useRouter();
 
@@ -8,13 +14,36 @@ const state = reactive({
     form: {
         loginId: '',
         loginPw: ''
-    }
+    },
+    error: ''
+});
+
+// Validasi form
+const isFormValid = computed(() => {
+    return state.form.loginId.trim() !== '' && state.form.loginPw.trim() !== '';
 });
 
 const submit = () => {
-    // Logika untuk memverifikasi kredensial pengguna dapat ditambahkan di sini
-    // Misalnya, jika login berhasil, arahkan ke dashboard
-    router.push({ name: 'dashboard' });
+    // Reset error message
+    state.error = '';
+
+    // Cek apakah form kosong
+    if (!isFormValid.value) {
+        state.error = 'Username dan password harus diisi';
+        return;
+    }
+
+    // Verifikasi kredensial
+    if (
+        state.form.loginId === dummyCredentials.username &&
+        state.form.loginPw === dummyCredentials.password
+    ) {
+        // Login berhasil, arahkan ke dashboard
+        router.push({ name: 'dashboard' });
+    } else {
+        // Login gagal
+        state.error = 'Username atau password salah';
+    }
 };
 </script>
 
@@ -27,13 +56,34 @@ const submit = () => {
             <form @submit.prevent="submit">
                 <div class="mb-3">
                     <label for="admin-login-id" class="form-label">Username</label>
-                    <input type="text" id="admin-login-id" class="form-control" v-model="state.form.loginId">
+                    <input 
+                        type="text" 
+                        id="admin-login-id" 
+                        class="form-control" 
+                        v-model="state.form.loginId"
+                        :class="{ 'is-invalid': state.error && !state.form.loginId }"
+                    >
                 </div>
                 <div class="mb-3">
                     <label for="admin-login-pw" class="form-label">Password</label>
-                    <input type="password" id="admin-login-pw" class="form-control" v-model="state.form.loginPw">
+                    <input 
+                        type="password" 
+                        id="admin-login-pw" 
+                        class="form-control" 
+                        v-model="state.form.loginPw"
+                        :class="{ 'is-invalid': state.error && !state.form.loginPw }"
+                    >
                 </div>
-                <button type="submit" class="btn btn-primary">Masuk</button>
+                <div v-if="state.error" class="alert alert-danger" role="alert">
+                    {{ state.error }}
+                </div>
+                <button 
+                    type="submit" 
+                    class="btn btn-primary" 
+                    :disabled="!isFormValid"
+                >
+                    Masuk
+                </button>
             </form>
         </div>
     </div>
@@ -43,5 +93,13 @@ const submit = () => {
 .logo {
     width: 150px;
     height: 150px;
+}
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+.is-invalid {
+    border-color: #dc3545;
 }
 </style>
